@@ -1,4 +1,4 @@
-const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1337033829784883241/6_scnki_nhrmMsbJg0nrMiXdmk_SdP_MZcKcjugtUuECwjzIkSys22hAMG8cNtXUKAQg";
+const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/redacted";
 
 function findSteamLinks() {
     const regex = /steam:\/\/[^\s"']+/gi;
