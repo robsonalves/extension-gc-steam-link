@@ -13,7 +13,7 @@ function findSteamLinks() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ content: `🎮 **Steam Link Encontrado:** ${link}` })
             })
-            .then(response => console.log("✅ Link enviado com sucesso!"))
+            .then(() => console.log("✅ Link enviado com sucesso!"))
             .catch(error => console.error("❌ Erro ao enviar:", error));
         });
     }
