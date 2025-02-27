@@ -1,16 +1,22 @@
 {
   "manifest_version": 3,
-  "name": "Steam Link Sender",
+  "name": "Steam Link Finder",
   "version": "1.0",
-  "description": "Captura links steam:// e envia para o Discord",
-  "permissions": ["activeTab", "storage"],
-  "host_permissions": ["<all_urls>"],
-  "background": {
-    "service_worker": "background.js"
+  "description": "Captura links steam://connect com IP e senha na GamersClub e envia para o Discord.",
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
   },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://gamersclub.com.br/*"
+  ],
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": ["https://gamersclub.com.br/*"],
       "js": ["content.js"]
     }
   ]
