@@ -1,4 +1,4 @@
-const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1338652659196100638/Rd_D5smi50yFBnFr77HdzkuPj4r2Q7M5KzeU8AWfsr0cEWrPqPVb-6RAct6O1nIh2YWF";
+const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/REDACTED";
 
 // Garante que o script só rode no site correto
 console.log("� Site detectado:", window.location.hostname);
