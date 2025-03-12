@@ -4,58 +4,60 @@ console.log("🔍 Site detectado:", window.location.hostname);
 console.log("🚀 Enviando para WebHook:", DISCORD_WEBHOOK_URL);
 
 // Cache of already sent IP:PORT to avoid duplication
- const sentLinks = new Set(JSON.parse(localStorage.getItem("sentSteamLinks") || "[]"));
+const sentLinks = new Set(JSON.parse(localStorage.getItem("sentSteamLinks") || "[]"));
 
- function saveSentLinks() {
-     localStorage.setItem("sentSteamLinks", JSON.stringify(Array.from(sentLinks)));
- }
+function saveSentLinks() {
+    localStorage.setItem("sentSteamLinks", JSON.stringify(Array.from(sentLinks)));
+}
 
- function sendToDiscord(link) {
-     const match = link.match(/steam:\/\/connect\/([\d.]+):(\d+)\/(\w+)/);
-     if (match) {
-         const ip = match[1]; // IP
-         const port = match[2]; // Porta
-         const password = match[3]; // Senha
-         const ipPort = `${ip}:${port}`; // Chave única para cache
+// Define regex once to reuse it
+const steamRegex = /steam:\/\/connect\/([\d.]+):(\d+)\/(\w+)/gi;
 
-         if (sentLinks.has(ipPort)) {
-             console.log(`⚠️ IP:PORTA já enviado, ignorando: ${ipPort}`);
-             return;
-         }
+function extractSteamLinks(text) {
+    return [...text.matchAll(steamRegex)];
+}
 
-         console.log("🎯 Steam IP válido encontrado:", ip, "Porta:", port, "Senha:", password);
-         sentLinks.add(ipPort);
-         saveSentLinks();
+function sendToDiscord(link) {
+    const match = extractSteamLinks(link)[0]; // Get the first match
+    if (match) {
+        const ip = match[1]; // IP
+        const port = match[2]; // Port
+        const password = match[3]; // Password
+        const ipPort = `${ip}:${port}`; // Unique key for cache
 
-         // Calcula timestamp para 3 minutos no futuro
-         const timestamp = Math.floor(Date.now() / 1000) + 180;
+        if (sentLinks.has(ipPort)) {
+            console.log(`⚠️ IP:PORT already sent, ignoring: ${ipPort}`);
+            return;
+        }
 
-         fetch(DISCORD_WEBHOOK_URL, {
-             method: "POST",
-             headers: { "Content-Type": "application/json" },
-             body: JSON.stringify({
-                 content: `🎮 **Steam Link Encontrado:** ${link}\n🔗 **IP:Porta:** \`${ip}:${port}\`\n⏳ **Expire:** <t:${timestamp}:R>`
-             })
-         })
-         .then(() => console.log("✅ Link enviado com sucesso!"))
-         .catch(error => console.error("❌ Erro ao enviar:", error));
-     }
- }
+        console.log("🎯 Valid Steam IP found:", ip, "Port:", port, "Password:", password);
+        sentLinks.add(ipPort);
+        saveSentLinks();
 
- function findSteamLinks() {
-     const regex = /steam:\/\/connect\/([\d.]+):(\d+)\/(\w+)/gi;
-     const matches = [...document.body.innerHTML.matchAll(regex)];
+        // Calculate timestamp for 3 minutes in the future
+        const timestamp = Math.floor(Date.now() / 1000) + 180;
 
-     matches.forEach(match => {
-         const link = match[0];
-         sendToDiscord(link);
-     });
- }
+        fetch(DISCORD_WEBHOOK_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                content: `🎮 **Steam Link Found:** ${link}\n🔗 **IP:Port:** \`${ip}:${port}\`\n⏳ **Expires:** <t:${timestamp}:R>`
+            })
+        })
+        .then(() => console.log("✅ Link successfully sent!"))
+        .catch(error => console.error("❌ Error sending:", error));
+    }
+}
 
- // 🔄 Observes DOM changes to capture dynamic links
- const observer = new MutationObserver(() => findSteamLinks());
- observer.observe(document.body, { childList: true, subtree: true });
+function findSteamLinks() {
+    const matches = extractSteamLinks(document.body.innerHTML);
+    matches.forEach(match => sendToDiscord(match[0])); // Send full link
+}
 
- window.addEventListener("load", () => {
+// 🔄 Observes DOM changes to capture dynamic links
+const observer = new MutationObserver(() => findSteamLinks());
+observer.observe(document.body, { childList: true, subtree: true });
+
+window.addEventListener("load", () => {
     setTimeout(findSteamLinks, 3000); // Waits for the page to load
- });
+});
