@@ -17,6 +17,15 @@ function extractSteamLinks(text) {
     return [...text.matchAll(steamRegex)];
 }
 
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        console.log("📋 Texto copiado:", text);
+    }).catch(err => {
+        console.error("❌ Erro ao copiar:", err);
+    });
+}
+
+
 function sendToDiscord(link) {
     const match = extractSteamLinks(link)[0]; // Get the first match
     if (match) {
@@ -33,6 +42,7 @@ function sendToDiscord(link) {
         console.log("🎯 Valid Steam IP found:", ip, "Port:", port, "Password:", password);
         sentLinks.add(ipPort);
         saveSentLinks();
+        copyToClipboard(ipPort); // Copy to clipboard
 
         // Calculate timestamp for 3 minutes in the future
         const timestamp = Math.floor(Date.now() / 1000) + 180;
@@ -41,7 +51,9 @@ function sendToDiscord(link) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                content: `🎮 **Steam Link Found:** ${link}\n🔗 **IP:Port:** \`${ip}:${port}\`\n⏳ **Expires:** <t:${timestamp}:R>`
+                content: `🎮 **Steam Link Found:** ${link}\n
+                          🔗 **IP:Port:** \`${ip}:${port}\`\n
+                          ⏳ **Expires:** <t:${timestamp}:R>`
             })
         })
         .then(() => console.log("✅ Link successfully sent!"))
