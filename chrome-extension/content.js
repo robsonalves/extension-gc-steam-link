@@ -1,4 +1,6 @@
 const API_URL = "https://gc-steam-converter-discord-bot-production.up.railway.app/send";
+const CACHE_EXPIRATION_MS = 30 * 60 * 1000; // 30 minutos
+const CACHE_KEY = "sentLinks";
 
 // Define regex para capturar links Steam
 const steamRegex = /steam:\/\/connect\/([\d.]+):(\d+)\/(\w+)/gi;
@@ -23,9 +25,9 @@ function sendToAPI(link) {
         const password = match[3]; // Senha
         const cacheKey = `${ip}:${port}/${password}`; // Chave única para cache
 
-        let stored = JSON.parse(localStorage.getItem("sentLinks") || "{}");
+        let stored = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}");
         let now = Date.now();
-        if (stored.timestamp && now - stored.timestamp > 1800000) { // 30 minutos
+        if (stored.timestamp && now - stored.timestamp > CACHE_EXPIRATION_MS) { // 30 minutos
             stored = { list: [], timestamp: now };
             console.log("🧹 Cache expirada, limpando...");
         }
