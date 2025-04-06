@@ -1,4 +1,5 @@
-const API_URL = "https://gc-steam-converter-discord-bot-production.up.railway.app/send";
+// const API_URL = "https://gc-steam-converter-discord-bot-production.up.railway.app/send";
+const API_URL = "http://192.168.0.239:5001/send";
 
 // Define regex para capturar links Steam
 const steamRegex = /steam:\/\/connect\/([\d.]+):(\d+)\/(\w+)/gi;
@@ -21,7 +22,21 @@ function sendToAPI(link) {
         const ip = match[1]; // IP
         const port = match[2]; // Porta
         const password = match[3]; // Senha
-        const ipPort = `${ip}:${port}`; // Chave única para cache
+        const cacheKey = `${ip}:${port}/${password}`; // Chave única para cache
+
+        let stored = JSON.parse(localStorage.getItem("sentLinks") || "{}");
+        let now = Date.now();
+        if (stored.timestamp && now - stored.timestamp > 1800000) { // 30 minutos
+            stored = { list: [], timestamp: now };
+            console.log("🧹 Cache expirada, limpando...");
+        }
+        let sentLinks = new Set(stored.list || []);
+        window.__sentLinksCache = sentLinks;
+
+        if (sentLinks.has(cacheKey)) {
+            console.log("⚠️ Link já enviado anteriormente:", cacheKey);
+            return;
+        }
 
         console.log("🎯 IP Steam encontrado:", ip, "Porta:", port, "Senha:", password);
 
@@ -36,6 +51,8 @@ function sendToAPI(link) {
         .then(response => {
             if (response.ok) {
                 console.log("✅ Link enviado para a API com sucesso!");
+                sentLinks.add(cacheKey);
+                localStorage.setItem("sentLinks", JSON.stringify({ list: [...sentLinks], timestamp: Date.now() }));
             } else {
                 console.error("❌ Erro ao enviar para a API:", response.statusText);
             }
