@@ -1,5 +1,4 @@
-// const API_URL = "https://gc-steam-converter-discord-bot-production.up.railway.app/send";
-const API_URL = "http://192.168.0.239:5001/send";
+const API_URL = "https://gc-steam-converter-discord-bot-production.up.railway.app/send";
 
 // Define regex para capturar links Steam
 const steamRegex = /steam:\/\/connect\/([\d.]+):(\d+)\/(\w+)/gi;
